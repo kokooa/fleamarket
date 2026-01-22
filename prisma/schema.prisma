@@ -1,0 +1,304 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_APPROVAL
+  ACTIVE
+  SOLD
+  REMOVED
+}
+
+enum OverallGrade {
+  A_LIKE_NEW    // 거의 새것 (경미한 사용감)
+  B_GOOD        // 양호 (사용감 있으나 기능 정상)
+  C_FAIR        // 보통 (눈에 띄는 하자, 일부 기능 이상)
+  D_POOR        // 불량 (주요 기능 고장)
+  F_FOR_PARTS   // 부품용
+}
+
+enum FunctionalStatus {
+  FULLY_WORKING
+  PARTIALLY_WORKING
+  NOT_WORKING
+}
+
+enum CosmeticGrade {
+  EXCELLENT  // 거의 무상처
+  GOOD       // 경미한 스크래치
+  FAIR       // 눈에 띄는 스크래치/찍힘
+  POOR       // 깨짐/심한 손상
+}
+
+enum DefectType {
+  SCREEN_CRACK
+  SCREEN_BURN_IN
+  TOUCH_ISSUE
+  BATTERY_DEGRADED
+  BATTERY_SWOLLEN
+  CAMERA_DEFECT
+  SPEAKER_DEFECT
+  MICROPHONE_DEFECT
+  BUTTON_DEFECT
+  PORT_DEFECT
+  WATER_DAMAGE
+  PHYSICAL_DAMAGE
+  SOFTWARE_ISSUE
+  OTHER
+}
+
+enum DefectSeverity {
+  MINOR
+  MODERATE
+  SEVERE
+  CRITICAL
+}
+
+enum ImageType {
+  MAIN
+  DEFECT
+  GENERAL
+  CERTIFICATE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          UserRole  @default(BUYER)
+  phone         String?
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sellerProfile SellerProfile?
+  products      Product[]      @relation("SellerProducts")
+  orders        Order[]
+  reviews       Review[]
+  cartItems     CartItem[]
+
+  @@index([email])
+}
+
+model SellerProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  shopName    String
+  description String?
+  avatar      String?
+  banner      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  parentId    String?
+  name        String
+  slug        String   @unique
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Product {
+  id             String        @id @default(uuid())
+  sellerId       String
+  categoryId     String
+  name           String
+  description    String
+  brand          String
+  model          String
+  serialNumber   String?
+  originalPrice  Decimal       @db.Decimal(10, 2)
+  sellingPrice   Decimal       @db.Decimal(10, 2)
+  stock          Int           @default(1)
+  status         ProductStatus @default(DRAFT)
+  purchaseDate   DateTime?
+  warrantyMonths Int?
+  isForParts     Boolean       @default(false)
+  isRepairable   Boolean       @default(false)
+  repairNotes    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  seller           User              @relation("SellerProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+  category         Category          @relation(fields: [categoryId], references: [id])
+  condition        ProductCondition?
+  defects          DefectDetail[]
+  images           ProductImage[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+  cartItems        CartItem[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isForParts])
+  @@index([brand])
+}
+
+model ProductCondition {
+  id               String           @id @default(uuid())
+  productId        String           @unique
+  overallGrade     OverallGrade
+  functionalStatus FunctionalStatus
+  cosmeticGrade    CosmeticGrade
+  batteryHealth    Int?             // 배터리 건강도 (0-100%)
+  screenDefect     Boolean          @default(false)
+  cameraDefect     Boolean          @default(false)
+  speakerDefect    Boolean          @default(false)
+  portDefect       Boolean          @default(false)
+  buttonDefect     Boolean          @default(false)
+  additionalNotes  String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([overallGrade])
+}
+
+model DefectDetail {
+  id          String         @id @default(uuid())
+  productId   String
+  defectType  DefectType
+  severity    DefectSeverity
+  description String
+  imageUrl    String?
+  createdAt   DateTime       @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([defectType])
+}
+
+model ProductImage {
+  id        String    @id @default(uuid())
+  productId String
+  url       String
+  imageType ImageType @default(GENERAL)
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  buyerId         String
+  orderNumber     String      @unique
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  shippingAddress Json
+  buyerNotes      String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  buyer      User        @relation(fields: [buyerId], references: [id])
+  orderItems OrderItem[]
+
+  @@index([buyerId])
+  @@index([orderNumber])
+  @@index([status])
+}
+
+model OrderItem {
+  id              String  @id @default(uuid())
+  orderId         String
+  productId       String
+  quantity        Int
+  priceAtPurchase Decimal @db.Decimal(10, 2)
+
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId]) // 한 사용자당  제품 하나만
+  @@index([userId])
+  @@index([productId])
+}
+
+model Review {
+  id                 String   @id @default(uuid())
+  productId          String
+  userId             String
+  rating             Int // 1-5
+  comment            String
+  conditionAccurate  Boolean  @default(true) // 상태 설명이 정확했는지
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([productId, userId]) // 한 사용자당 한 제품에 하나의 리뷰만
+  @@index([productId])
+  @@index([userId])
+}
