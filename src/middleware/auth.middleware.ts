@@ -1,8 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import { verifyToken } from '../utils/jwt';
-
-export { AuthRequest };
 import prisma from '../config/database';
 import logger from '../utils/logger';
 

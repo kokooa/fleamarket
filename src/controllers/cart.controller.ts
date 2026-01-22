@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import prisma from '../config/database';
-import { AuthRequest } from '../middleware/auth.middleware';
+import { AuthRequest } from '../types';
+import { ApiError } from '../middleware/error.middleware';
 import logger from '../utils/logger';
 
 // 장바구니 조회
@@ -8,7 +9,7 @@ export const getCart = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user.id;
 
-        const cartItems = await prisma.cartItem.findMany({
+        const cartItems = await prisma.CartItem.findMany({
             where: { userId },
             include: {
                 product: {
@@ -74,7 +75,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
         }
 
         // 이미 장바구니에 있는지 확인
-        const existingItem = await prisma.cartItem.findUnique({
+        const existingItem = await prisma.CartItem.findUnique({
             where: {
                 userId_productId: {
                     userId,
@@ -87,7 +88,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
 
         if (existingItem) {
             // 이미 있으면 수량만 업데이트
-            cartItem = await prisma.cartItem.update({
+            cartItem = await prisma.CartItem.update({
                 where: { id: existingItem.id },
                 data: {
                     quantity: existingItem.quantity + quantity,
@@ -103,7 +104,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
             });
         } else {
             // 새로 추가
-            cartItem = await prisma.cartItem.create({
+            cartItem = await prisma.CartItem.create({
                 data: {
                     userId,
                     productId,
@@ -152,7 +153,7 @@ export const updateCartItem = async (req: AuthRequest, res: Response): Promise<v
         }
 
         // 자신의 장바구니 아이템인지 확인
-        const existingItem = await prisma.cartItem.findFirst({
+        const existingItem = await prisma.CartItem.findFirst({
             where: {
                 id: itemId,
                 userId,
@@ -167,7 +168,7 @@ export const updateCartItem = async (req: AuthRequest, res: Response): Promise<v
             return;
         }
 
-        const cartItem = await prisma.cartItem.update({
+        const cartItem = await prisma.CartItem.update({
             where: { id: itemId },
             data: { quantity },
             include: {
@@ -201,7 +202,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response): Promise<v
         const { itemId } = req.params;
 
         // 자신의 장바구니 아이템인지 확인
-        const existingItem = await prisma.cartItem.findFirst({
+        const existingItem = await prisma.CartItem.findFirst({
             where: {
                 id: itemId,
                 userId,
@@ -216,7 +217,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response): Promise<v
             return;
         }
 
-        await prisma.cartItem.delete({
+        await prisma.CartItem.delete({
             where: { id: itemId },
         });
 
@@ -240,7 +241,7 @@ export const clearCart = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user.id;
 
-        await prisma.cartItem.deleteMany({
+        await prisma.CartItem.deleteMany({
             where: { userId },
         });
 
