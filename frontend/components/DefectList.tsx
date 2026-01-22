@@ -1,6 +1,6 @@
 import React from 'react';
 
-type DefectSeverity = 'MINOR' | 'MODERATE' | 'SEVERE';
+type DefectSeverity = 'MINOR' | 'MODERATE' | 'SEVERE' | 'CRITICAL';
 type DefectType = 'SCREEN' | 'BATTERY' | 'CAMERA' | 'SPEAKER' | 'PORT' | 'BUTTON' | 'HOUSING' | 'OTHER';
 
 interface Defect {
