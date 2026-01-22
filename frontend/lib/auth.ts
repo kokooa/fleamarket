@@ -72,12 +72,14 @@ export const auth = {
 };
 
 // API 요청에 자동으로 토큰 추가하는 헬퍼
-export async function apiFetch(url: string, options: RequestInit = {}) {
-    const token = auth.getToken();
+export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+    const token = auth.getToken(); // Changed from getToken() to auth.getToken() for correctness
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+    const url = `${API_URL}${endpoint}`;
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...(options.headers || {}),
+        ...(options.headers as Record<string, string> || {}),
     };
 
     if (token) {
