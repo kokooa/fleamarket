@@ -50,7 +50,6 @@ export default function DefectList({ defects }: DefectListProps) {
                 return (
                     <div
                         key={defect.id}
-                        className={`border rounded-lg p-4 ${severityStyle.bgColor}`}
                         className={`border rounded-lg p-4 ${severityStyle.bg}`}
                     >
                         <div className="flex items-start justify-between mb-2">
