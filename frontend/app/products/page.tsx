@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import ProductCard from '@/components/ProductCard';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import ProductCard from '@/components/ProductCard';
+import SearchBar from '@/components/SearchBar';
 
 interface Product {
     id: string;
@@ -29,7 +29,7 @@ interface Category {
     name: string;
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
     const searchParams = useSearchParams();
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -185,5 +185,20 @@ export default function ProductsPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+// Main component with Suspense boundary
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12">
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="text-center">로딩 중...</div>
+                </div>
+            </div>
+        }>
+            <ProductsContent />
+        </Suspense>
     );
 }
