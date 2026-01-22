@@ -58,7 +58,7 @@ export default function DefectList({ defects }: DefectListProps) {
                                 <span className="font-semibold text-gray-800">
                                     {defectTypeLabels[defect.defectType]}
                                 </span>
-                                <span className={`text-xs font-medium px-2 py-1 rounded ${severityStyle.color} bg-white border`}>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${severityConfig[defect.severity].color} ${severityConfig[defect.severity].bg}`}>
                                     {severityStyle.label}
                                 </span>
                             </div>
