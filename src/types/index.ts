@@ -11,6 +11,7 @@ declare global {
 
 export interface AuthRequest extends Request {
     user?: Omit<User, 'password'>;
+    body: any;
 }
 
 export interface PaginationParams {
