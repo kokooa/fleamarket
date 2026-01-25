@@ -8,7 +8,7 @@ const storage = multer.memoryStorage();
 // File filter
 const fileFilter = (
     req: Request,
-    file: multer.File,
+    file: Express.Multer.File,
     cb: multer.FileFilterCallback
 ) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
