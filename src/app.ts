@@ -13,9 +13,37 @@ const app: Application = express();
 
 // Security middleware
 app.use(helmet());
+
+// CORS configuration - support multiple origins
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://fleamarket-amber.vercel.app',
+    'https://fleamarket-git-main-kokooas-projects.vercel.app',
+];
+
+// Add CORS_ORIGIN from environment if provided
+if (process.env.CORS_ORIGIN) {
+    const envOrigins = process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim());
+    allowedOrigins.push(...envOrigins);
+}
+
 app.use(
     cors({
-        origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+        origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+
+            // Check if origin is in allowed list or matches Vercel preview pattern
+            if (
+                allowedOrigins.includes(origin) ||
+                origin.endsWith('.vercel.app') ||
+                origin.endsWith('.vercel.com')
+            ) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
     })
 );
