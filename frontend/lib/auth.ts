@@ -97,7 +97,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 // 로그인 API
 export async function login(email: string, password: string) {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/auth/login`,
+        '/auth/login',
         {
             method: 'POST',
             body: JSON.stringify({ email, password }),
@@ -123,7 +123,7 @@ export async function register(userData: {
     phone?: string;
 }) {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/auth/register`,
+        '/auth/register',
         {
             method: 'POST',
             body: JSON.stringify(userData),
@@ -144,7 +144,7 @@ export async function register(userData: {
 // 내 정보 가져오기
 export async function getMe() {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/auth/me`
+        '/auth/me'
     );
 
     const data = await response.json();
