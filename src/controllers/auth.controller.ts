@@ -110,10 +110,20 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
                 message: error.message,
             });
         } else {
-            logger.error('Login error:', error);
+            // 상세한 에러 로그 출력
+            logger.error('Login error:', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined,
+                error: error,
+            });
+
             res.status(500).json({
                 success: false,
                 message: '로그인 중 오류가 발생했습니다.',
+                // 개발 환경에서는 에러 상세 정보 포함
+                ...(process.env.NODE_ENV === 'development' && {
+                    error: error instanceof Error ? error.message : String(error),
+                }),
             });
         }
     }
