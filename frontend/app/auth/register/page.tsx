@@ -13,6 +13,9 @@ export default function RegisterPage() {
         password: '',
         confirmPassword: '',
         phone: '',
+        role: 'BUYER' as 'BUYER' | 'SELLER',
+        shopName: '',
+        shopDescription: '',
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +44,9 @@ export default function RegisterPage() {
                 email: formData.email,
                 password: formData.password,
                 phone: formData.phone || undefined,
+                role: formData.role,
+                shopName: formData.role === 'SELLER' ? formData.shopName : undefined,
+                shopDescription: formData.role === 'SELLER' ? formData.shopDescription : undefined,
             });
 
             if (result.success) {
@@ -98,6 +104,35 @@ export default function RegisterPage() {
                             />
                         </div>
 
+                        {/* 역할 선택 */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                가입 유형 *
+                            </label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, role: 'BUYER' })}
+                                    className={`px-4 py-3 rounded-lg border-2 font-medium transition-all ${formData.role === 'BUYER'
+                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                        }`}
+                                >
+                                    🛍️ 구매자
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, role: 'SELLER' })}
+                                    className={`px-4 py-3 rounded-lg border-2 font-medium transition-all ${formData.role === 'SELLER'
+                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                                        }`}
+                                >
+                                    🏪 판매자
+                                </button>
+                            </div>
+                        </div>
+
                         <div>
                             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                                 이메일 *
@@ -128,6 +163,42 @@ export default function RegisterPage() {
                                 placeholder="010-1234-5678"
                             />
                         </div>
+
+                        {/* 판매자 정보 (판매자 선택 시만 표시) */}
+                        {formData.role === 'SELLER' && (
+                            <>
+                                <div>
+                                    <label htmlFor="shopName" className="block text-sm font-semibold text-gray-700 mb-2">
+                                        상점 이름 *
+                                    </label>
+                                    <input
+                                        id="shopName"
+                                        name="shopName"
+                                        type="text"
+                                        required={formData.role === 'SELLER'}
+                                        value={formData.shopName}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900"
+                                        placeholder="예: 철수의 중고전자"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="shopDescription" className="block text-sm font-semibold text-gray-700 mb-2">
+                                        상점 소개 (선택)
+                                    </label>
+                                    <textarea
+                                        id="shopDescription"
+                                        name="shopDescription"
+                                        rows={3}
+                                        value={formData.shopDescription}
+                                        onChange={(e) => setFormData({ ...formData, shopDescription: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 resize-none"
+                                        placeholder="상점을 간략히 소개해주세요"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">

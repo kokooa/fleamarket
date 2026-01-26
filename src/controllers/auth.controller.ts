@@ -9,7 +9,7 @@ import { UserRole } from '@prisma/client';
 
 export const register = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { email, password, name, phone } = req.body;
+        const { email, password, name, phone, role, shopName, shopDescription } = req.body;
 
         const existingUser = await prisma.user.findUnique({
             where: { email },
@@ -21,14 +21,27 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
 
         const hashedPw = await hashPassword(password);
 
+        // 역할에 따라 사용자 데이터 구성
+        const userData: any = {
+            email,
+            password: hashedPw,
+            name,
+            phone,
+            role: role || UserRole.BUYER,
+        };
+
+        // 판매자인 경우 SellerProfile 생성
+        if (role === UserRole.SELLER) {
+            userData.sellerProfile = {
+                create: {
+                    shopName: shopName || `${name}의 상점`,
+                    description: shopDescription || '',
+                },
+            };
+        }
+
         const user = await prisma.user.create({
-            data: {
-                email,
-                password: hashedPw,
-                name,
-                phone,
-                role: UserRole.BUYER,
-            },
+            data: userData,
             select: {
                 id: true,
                 email: true,
@@ -38,6 +51,13 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
                 emailVerified: true,
                 createdAt: true,
                 password: false,
+                sellerProfile: role === UserRole.SELLER ? {
+                    select: {
+                        id: true,
+                        shopName: true,
+                        description: true,
+                    },
+                } : false,
             },
         });
 

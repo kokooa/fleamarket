@@ -98,8 +98,8 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center space-x-4">
                         {user ? (
                             <>
-                                {/* 판매자/관리자 전용 메뉴 */}
-                                {(user.role === 'SELLER' || user.role === 'ADMIN') && (
+                                {/* 판매자 전용 메뉴 */}
+                                {user.role === 'SELLER' && (
                                     <Link
                                         href="/seller"
                                         className="text-gray-700 hover:text-indigo-600 font-medium transition-colors"
@@ -157,16 +157,6 @@ export default function Navbar() {
                                                     {user.role === 'ADMIN' ? '관리자' : user.role === 'SELLER' ? '판매자' : '구매자'}
                                                 </p>
                                             </div>
-
-                                            {user.role === 'BUYER' && (
-                                                <Link
-                                                    href="/seller/become"
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                                                    onClick={() => setShowUserMenu(false)}
-                                                >
-                                                    판매자 되기
-                                                </Link>
-                                            )}
 
                                             <Link
                                                 href="/orders"
@@ -252,7 +242,7 @@ export default function Navbar() {
                                     </p>
                                 </div>
 
-                                {(user.role === 'SELLER' || user.role === 'ADMIN') && (
+                                {user.role === 'SELLER' && (
                                     <Link
                                         href="/seller"
                                         className="block py-2 text-gray-700 hover:text-indigo-600 font-medium"
@@ -269,16 +259,6 @@ export default function Navbar() {
                                         onClick={() => setIsOpen(false)}
                                     >
                                         관리자 패널
-                                    </Link>
-                                )}
-
-                                {user.role === 'BUYER' && (
-                                    <Link
-                                        href="/seller/become"
-                                        className="block py-2 text-gray-700 hover:text-indigo-600 font-medium"
-                                        onClick={() => setIsOpen(false)}
-                                    >
-                                        판매자 되기
                                     </Link>
                                 )}
 

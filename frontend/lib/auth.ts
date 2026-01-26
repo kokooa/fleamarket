@@ -121,6 +121,9 @@ export async function register(userData: {
     password: string;
     name: string;
     phone?: string;
+    role?: 'BUYER' | 'SELLER';
+    shopName?: string;
+    shopDescription?: string;
 }) {
     const response = await apiFetch(
         '/auth/register',
