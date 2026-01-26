@@ -163,7 +163,7 @@ npm run prisma:seed      # 시드 데이터 삽입
 - CORS 설정
 - Rate limiting (15분당 100 요청)
 - JWT 기반 인증
-- bcrypt 비밀번호 암호화
+- bcryptjs 비밀번호 암호화
 - 역할 기반 권한 관리
 
 ## 📝 로깅

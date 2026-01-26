@@ -1,5 +1,5 @@
 import { PrismaClient, UserRole, OverallGrade, FunctionalStatus, CosmeticGrade } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +19,7 @@ async function main() {
     await prisma.user.deleteMany();
 
     // Create users
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcryptjs.hash('password123', 10);
 
     const admin = await prisma.user.create({
         data: {
