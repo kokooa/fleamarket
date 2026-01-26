@@ -11,6 +11,13 @@ dotenv.config();
 
 const app: Application = express();
 
+// Trust proxy - Required for Render deployment behind reverse proxy
+app.set('trust proxy', 1);
+
+// Basic middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Security middleware
 app.use(helmet());
 
