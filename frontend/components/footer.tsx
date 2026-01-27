@@ -27,7 +27,6 @@ export function Footer() {
                         <h4 className="font-semibold text-foreground mb-4 text-sm">마켓플레이스</h4>
                         <ul className="space-y-2.5">
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">전체 상품</Link></li>
-                            <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">핫딜</Link></li>
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">신상품</Link></li>
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">카테고리</Link></li>
                         </ul>
@@ -38,7 +37,6 @@ export function Footer() {
                         <ul className="space-y-2.5">
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">판매 시작</Link></li>
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">판매자 가이드</Link></li>
-                            <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">수수료 안내</Link></li>
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">판매자 센터</Link></li>
                         </ul>
                     </div>
@@ -56,9 +54,6 @@ export function Footer() {
                     <div>
                         <h4 className="font-semibold text-foreground mb-4 text-sm">회사</h4>
                         <ul className="space-y-2.5">
-                            <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">회사 소개</Link></li>
-                            <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">채용</Link></li>
-                            <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">블로그</Link></li>
                             <li><Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">제휴 문의</Link></li>
                         </ul>
                     </div>

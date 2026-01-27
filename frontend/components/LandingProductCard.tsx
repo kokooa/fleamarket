@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, ShoppingCart, Info } from "lucide-react"
 import { auth, apiFetch } from '@/lib/auth';
+import { toast } from "sonner"
 
 interface ProductCardProps {
     id: string
@@ -45,7 +47,12 @@ export function LandingProductCard({
 
         const user = auth.getUser();
         if (!user) {
-            router.push('/auth/login');
+            toast.error("로그인이 필요합니다.", {
+                action: {
+                    label: "로그인",
+                    onClick: () => router.push('/auth/login')
+                }
+            });
             return;
         }
 
@@ -61,13 +68,13 @@ export function LandingProductCard({
             if (response.ok) {
                 // Trigger cart update event
                 window.dispatchEvent(new Event('cart-updated'));
-                alert("장바구니에 담겼습니다.");
+                toast.success("장바구니에 담겼습니다.");
             } else {
-                alert("장바구니에 담지 못했습니다.");
+                toast.error("장바구니에 담지 못했습니다.");
             }
         } catch (error) {
             console.error('Failed to add to cart:', error);
-            alert("오류가 발생했습니다.");
+            toast.error("오류가 발생했습니다.");
         } finally {
             setAdding(false);
         }
@@ -89,13 +96,16 @@ export function LandingProductCard({
         <div className="group relative bg-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80 h-full flex flex-col">
             {/* Image Container */}
             <Link href={`/products/${id}`} className="relative aspect-square bg-muted overflow-hidden block">
-                <div
-                    className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${imageUrl})` }}
+                <Image
+                    src={imageUrl}
+                    alt={name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
 
                 {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
                     <Badge className="bg-primary text-primary-foreground font-semibold rounded-lg shadow-sm">
                         -{discountPercent}%
                     </Badge>
@@ -122,7 +132,7 @@ export function LandingProductCard({
                 </button>
 
                 {/* Quick Add Button */}
-                <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                <div className="absolute bottom-3 left-3 right-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10">
                     <Button
                         onClick={handleAddToCart}
                         disabled={adding}
