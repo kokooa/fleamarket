@@ -27,6 +27,7 @@ interface Product {
 interface Category {
     id: string;
     name: string;
+    slug: string;
 }
 
 function ProductsContent() {
@@ -46,25 +47,42 @@ function ProductsContent() {
         try {
             setIsLoading(true);
 
-            // Fetch categories
+            // 1. Fetch categories first
+            let currentCategories: Category[] = [];
             const categoriesRes = await fetch(`${API_URL}/categories`);
+
             if (categoriesRes.ok) {
                 const categoriesData = await categoriesRes.json();
-                setCategories(categoriesData.data || []);
+                currentCategories = categoriesData.data || [];
+                setCategories(currentCategories);
             }
 
-            // Fetch products with search params
+            // 2. Prepare search params
             const params = new URLSearchParams();
-            const categoryId = searchParams.get('categoryId');
+
+            // Handle both categoryId and category (slug) from URL
+            let targetCategoryId = searchParams.get('categoryId');
+            const categorySlug = searchParams.get('category');
+
+            // If we have a slug but no ID, try to find the ID from loaded categories
+            if (!targetCategoryId && categorySlug && currentCategories.length > 0) {
+                const matchedCategory = currentCategories.find(c => c.slug === categorySlug); // Assuming Category interface has slug
+                if (matchedCategory) {
+                    targetCategoryId = matchedCategory.id;
+                }
+            }
+
+            if (targetCategoryId) params.set('categoryId', targetCategoryId);
+
             const overallGrade = searchParams.get('overallGrade');
             const brand = searchParams.get('brand');
             const search = searchParams.get('search');
 
-            if (categoryId) params.set('categoryId', categoryId);
             if (overallGrade) params.set('overallGrade', overallGrade);
             if (brand) params.set('brand', brand);
             if (search) params.set('search', search);
 
+            // 3. Fetch products
             const productsRes = await fetch(
                 `${API_URL}/products?${params.toString()}`
             );
@@ -76,9 +94,8 @@ function ProductsContent() {
             }
         } catch (error) {
             console.error('Failed to fetch data:', error);
-            // 에러가 발생해도 빈 배열로 설정하여 UI가 깨지지 않도록 함
             setProducts([]);
-            setCategories([]);
+            // Keep existing categories if fetch fails
         } finally {
             setIsLoading(false);
         }
