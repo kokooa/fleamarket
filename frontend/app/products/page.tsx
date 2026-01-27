@@ -174,7 +174,7 @@ function ProductsContent() {
                             필터 조건을 변경하거나 나중에 다시 확인해주세요.
                             <br />
                             <span className="text-sm text-gray-500 mt-2 block">
-                                백엔드 서버가 실행 중인지 확인하세요: http://localhost:5001/health
+                                백엔드 서버가 실행 중인지 확인하세요.
                             </span>
                         </p>
                     </div>
