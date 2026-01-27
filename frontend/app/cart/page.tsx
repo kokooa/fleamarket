@@ -67,7 +67,7 @@ export default function CartPage() {
             setUpdatingItems(prev => new Set(prev).add(itemId));
 
             const response = await apiFetch(
-                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/cart/${itemId}`,
+                `/cart/${itemId}`,
                 {
                     method: 'PUT',
                     body: JSON.stringify({ quantity: newQuantity }),

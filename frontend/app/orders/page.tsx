@@ -43,9 +43,7 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
         try {
             setIsLoading(true);
-            const response = await apiFetch(
-                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/orders`
-            );
+            const response = await apiFetch('/orders');
 
             const data = await response.json();
             if (data.success) {

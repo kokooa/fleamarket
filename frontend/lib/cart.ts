@@ -2,16 +2,14 @@ import { apiFetch } from './auth';
 
 // 장바구니 API 호출 함수들
 export async function getCart() {
-    const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/cart`
-    );
+    const response = await apiFetch('/cart');
     const data = await response.json();
     return data.success ? data.data : [];
 }
 
 export async function addToCart(productId: string, quantity: number = 1) {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/cart`,
+        '/cart',
         {
             method: 'POST',
             body: JSON.stringify({ productId, quantity }),
@@ -22,7 +20,7 @@ export async function addToCart(productId: string, quantity: number = 1) {
 
 export async function updateCartItemQuantity(itemId: string, quantity: number) {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/cart/${itemId}`,
+        `/cart/${itemId}`,
         {
             method: 'PUT',
             body: JSON.stringify({ quantity }),
@@ -33,7 +31,7 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
 
 export async function removeFromCart(itemId: string) {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/cart/${itemId}`,
+        `/cart/${itemId}`,
         {
             method: 'DELETE',
         }
@@ -43,7 +41,7 @@ export async function removeFromCart(itemId: string) {
 
 export async function clearCart() {
     const response = await apiFetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/cart`,
+        '/cart',
         {
             method: 'DELETE',
         }

@@ -75,7 +75,7 @@ export const auth = {
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     const token = auth.getToken(); // Changed from getToken() to auth.getToken() for correctness
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
-    const url = `${API_URL}${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
 
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
