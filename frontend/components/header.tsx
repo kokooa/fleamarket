@@ -131,21 +131,25 @@ export function Header() {
                     <div className="flex items-center gap-2">
                         {user ? (
                             <>
-                                <Link href="/orders">
-                                    <Button variant="ghost" size="icon" className="hidden md:flex hover:bg-muted rounded-xl" title="내 주문">
-                                        <User className="w-5 h-5 text-muted-foreground" />
-                                    </Button>
-                                </Link>
-                                <Link href="/cart">
-                                    <Button variant="ghost" size="icon" className="relative hover:bg-muted rounded-xl">
-                                        <ShoppingCart className="w-5 h-5 text-muted-foreground" />
-                                        {cartItemCount > 0 && (
-                                            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
-                                                {cartItemCount}
-                                            </span>
-                                        )}
-                                    </Button>
-                                </Link>
+                                {user.role !== 'ADMIN' && (
+                                    <>
+                                        <Link href="/orders">
+                                            <Button variant="ghost" size="icon" className="hidden md:flex hover:bg-muted rounded-xl" title="내 주문">
+                                                <User className="w-5 h-5 text-muted-foreground" />
+                                            </Button>
+                                        </Link>
+                                        <Link href="/cart">
+                                            <Button variant="ghost" size="icon" className="relative hover:bg-muted rounded-xl">
+                                                <ShoppingCart className="w-5 h-5 text-muted-foreground" />
+                                                {cartItemCount > 0 && (
+                                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                                                        {cartItemCount}
+                                                    </span>
+                                                )}
+                                            </Button>
+                                        </Link>
+                                    </>
+                                )}
                                 <Button
                                     onClick={handleLogout}
                                     variant="ghost"
@@ -153,13 +157,14 @@ export function Header() {
                                 >
                                     로그아웃
                                 </Button>
-                                {user.role === 'SELLER' || user.role === 'ADMIN' ? (
+                                {user.role === 'SELLER' && (
                                     <Link href="/seller/products/new">
                                         <Button className="hidden md:flex bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-sm hover:shadow-md transition-all">
                                             판매 시작
                                         </Button>
                                     </Link>
-                                ) : (
+                                )}
+                                {user.role !== 'SELLER' && user.role !== 'ADMIN' && (
                                     <Link href="/seller/become">
                                         <Button className="hidden md:flex bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-sm hover:shadow-md transition-all">
                                             판매자 등록
@@ -228,17 +233,21 @@ export function Header() {
                                         <div className="px-3 py-2 text-sm font-semibold text-foreground border-t border-border/50 my-2 pt-4">
                                             {user.name}님
                                         </div>
-                                        <Link href="/orders" className="px-3 py-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all">
-                                            내 주문
-                                        </Link>
-                                        <Link href="/cart" className="px-3 py-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all flex justify-between items-center">
-                                            장바구니
-                                            {cartItemCount > 0 && (
-                                                <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                                                    {cartItemCount}
-                                                </span>
-                                            )}
-                                        </Link>
+                                        {user.role !== 'ADMIN' && (
+                                            <>
+                                                <Link href="/orders" className="px-3 py-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all">
+                                                    내 주문
+                                                </Link>
+                                                <Link href="/cart" className="px-3 py-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all flex justify-between items-center">
+                                                    장바구니
+                                                    {cartItemCount > 0 && (
+                                                        <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                                                            {cartItemCount}
+                                                        </span>
+                                                    )}
+                                                </Link>
+                                            </>
+                                        )}
                                         <button
                                             onClick={handleLogout}
                                             className="text-left px-3 py-2.5 text-destructive hover:bg-destructive/10 rounded-xl transition-all"

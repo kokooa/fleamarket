@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
     getPendingProducts,
+    getAllProducts,
     approveProduct,
     rejectProduct,
     getAllUsers,
@@ -15,6 +16,7 @@ const router = Router();
 // All routes require admin authentication
 router.use(authenticate, requireAdmin);
 
+router.get('/products', getAllProducts);
 router.get('/products/pending', getPendingProducts);
 router.put('/products/:id/approve', approveProduct);
 router.put('/products/:id/reject', rejectProduct);

@@ -43,6 +43,71 @@ export const getPendingProducts = async (req: AuthRequest, res: Response): Promi
     }
 };
 
+export const getAllProducts = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { page = 1, limit = 20, status, search } = req.query;
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const where: any = {};
+
+        if (status && status !== 'all') {
+            if (status === 'pending') where.status = ProductStatus.PENDING_APPROVAL;
+            else if (status === 'active') where.status = ProductStatus.ACTIVE;
+            else if (status === 'rejected') where.status = ProductStatus.REMOVED; // Mapped REJECTED -> REMOVED? Wait, let's check rejectProduct: it sets REMOVED. Frontend uses REJECTED.
+            else if (status === 'sold') where.status = ProductStatus.SOLD;
+            else where.status = status;
+        }
+
+        if (search) {
+            where.OR = [
+                { name: { contains: String(search), mode: 'insensitive' } },
+                { description: { contains: String(search), mode: 'insensitive' } },
+                { brand: { contains: String(search), mode: 'insensitive' } },
+                { model: { contains: String(search), mode: 'insensitive' } },
+            ];
+        }
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                include: {
+                    condition: true,
+                    category: true,
+                    images: { take: 1 },
+                    seller: {
+                        select: {
+                            id: true,
+                            name: true,
+                            sellerProfile: { select: { shopName: true } },
+                        },
+                    },
+                },
+                skip,
+                take: Number(limit),
+                orderBy: { createdAt: 'desc' },
+            }),
+            prisma.product.count({ where }),
+        ]);
+
+        res.json({
+            success: true,
+            data: products,
+            pagination: {
+                page: Number(page),
+                limit: Number(limit),
+                total,
+                totalPages: Math.ceil(total / Number(limit)),
+            },
+        });
+    } catch (error) {
+        logger.error('Get all products error:', error);
+        res.status(500).json({
+            success: false,
+            message: '제품 목록을 가져오는 중 오류가 발생했습니다.',
+        });
+    }
+};
+
 export const approveProduct = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { id } = req.params;

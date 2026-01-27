@@ -93,7 +93,7 @@ async function main() {
     const hashedPassword = await bcryptjs.hash('password123', 10);
 
     const sellers = [];
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 2; i++) {
         const seller = await prisma.user.create({
             data: {
                 email: `seller${i}@gmail.com`,
@@ -118,6 +118,17 @@ async function main() {
             password: hashedPassword,
             name: '구매자1',
             role: UserRole.BUYER,
+            emailVerified: true,
+        },
+    });
+
+    // Create Admin
+    await prisma.user.create({
+        data: {
+            email: 'admin@marketplace.com',
+            password: hashedPassword,
+            name: '총관리자',
+            role: UserRole.ADMIN,
             emailVerified: true,
         },
     });
