@@ -87,39 +87,29 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
         let cartItem;
 
         if (existingItem) {
-            // 이미 있으면 수량만 업데이트
-            cartItem = await prisma.cartItem.update({
-                where: { id: existingItem.id },
-                data: {
-                    quantity: existingItem.quantity + quantity,
-                },
-                include: {
-                    product: {
-                        include: {
-                            images: true,
-                            condition: true,
-                        },
-                    },
-                },
+            res.status(409).json({
+                success: false,
+                message: '이미 장바구니에 담긴 상품입니다.',
             });
-        } else {
-            // 새로 추가
-            cartItem = await prisma.cartItem.create({
-                data: {
-                    userId,
-                    productId,
-                    quantity,
-                },
-                include: {
-                    product: {
-                        include: {
-                            images: true,
-                            condition: true,
-                        },
-                    },
-                },
-            });
+            return;
         }
+
+        // 새로 추가
+        cartItem = await prisma.cartItem.create({
+            data: {
+                userId,
+                productId,
+                quantity: 1, // Enforce quantity 1
+            },
+            include: {
+                product: {
+                    include: {
+                        images: true,
+                        condition: true,
+                    },
+                },
+            },
+        });
 
         logger.info(`Product added to cart: ${productId} by user ${userId}`);
 

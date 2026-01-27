@@ -166,7 +166,11 @@ export default function ProductDetailPage() {
             if (result.success) {
                 router.push('/cart');
             } else {
-                alert(result.message || '구매 처리에 실패했습니다.');
+                if (result.message === '이미 장바구니에 담긴 상품입니다.') {
+                    router.push('/cart');
+                } else {
+                    alert(result.message || '구매 처리에 실패했습니다.');
+                }
             }
         } catch (error) {
             alert('구매 처리 중 오류가 발생했습니다.');

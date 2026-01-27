@@ -28,7 +28,7 @@ export default function CartPage() {
     const [user, setUser] = useState<any>(null);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
+
     const [isCheckingOut, setIsCheckingOut] = useState(false);
 
     useEffect(() => {
@@ -60,37 +60,7 @@ export default function CartPage() {
         }
     };
 
-    const updateQuantity = async (itemId: string, newQuantity: number) => {
-        if (newQuantity < 1) return;
 
-        try {
-            setUpdatingItems(prev => new Set(prev).add(itemId));
-
-            const response = await apiFetch(
-                `/cart/${itemId}`,
-                {
-                    method: 'PUT',
-                    body: JSON.stringify({ quantity: newQuantity }),
-                }
-            );
-
-            if (response.ok) {
-                setCartItems(items =>
-                    items.map(item =>
-                        item.id === itemId ? { ...item, quantity: newQuantity } : item
-                    )
-                );
-            }
-        } catch (error) {
-            console.error('Failed to update quantity:', error);
-        } finally {
-            setUpdatingItems(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(itemId);
-                return newSet;
-            });
-        }
-    };
 
     const removeItem = async (itemId: string) => {
         if (!confirm('이 제품을 장바구니에서 제거하시겠습니까?')) return;
@@ -216,7 +186,7 @@ export default function CartPage() {
                         <div className="lg:col-span-2 space-y-4">
                             {cartItems.map(item => {
                                 const imageUrl = item.product.images?.[0]?.url || '/placeholder-product.png';
-                                const isUpdating = updatingItems.has(item.id);
+
 
                                 return (
                                     <div
@@ -254,24 +224,10 @@ export default function CartPage() {
                                                     {Number(item.product.sellingPrice).toLocaleString()}원
                                                 </p>
 
-                                                {/* 수량 조절 */}
+                                                {/* 수량 표시 (고정) */}
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex items-center border border-gray-300 rounded-lg">
-                                                        <button
-                                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                            disabled={item.quantity <= 1 || isUpdating}
-                                                            className="px-4 py-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                                        >
-                                                            -
-                                                        </button>
-                                                        <span className="px-6 py-2 font-semibold">{item.quantity}</span>
-                                                        <button
-                                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                            disabled={isUpdating}
-                                                            className="px-4 py-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                                        >
-                                                            +
-                                                        </button>
+                                                    <div className="flex items-center border border-gray-300 rounded-lg bg-gray-50">
+                                                        <span className="px-6 py-2 font-semibold text-gray-500">1</span>
                                                     </div>
 
                                                     <button
