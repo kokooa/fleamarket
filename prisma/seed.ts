@@ -203,13 +203,14 @@ async function main() {
                     images: {
                         create: [
                             {
-                                // Unsplash Source API with specific keyword
-                                url: `https://source.unsplash.com/random/800x600/?${encodeURIComponent(imageKeyword)}&sig=${randomInt(1, 10000)}`,
+                                // LoremFlickr for reliable keyword-based images
+                                // Format: https://loremflickr.com/width/height/keyword
+                                url: `https://loremflickr.com/800/600/${encodeURIComponent(imageKeyword)}?lock=${randomInt(1, 10000)}`,
                                 imageType: 'MAIN',
                                 order: 1
                             },
                             {
-                                url: `https://source.unsplash.com/random/800x600/?defect,broken,texture&sig=${randomInt(10001, 20000)}`,
+                                url: `https://loremflickr.com/800/600/defect,broken?lock=${randomInt(10001, 20000)}`,
                                 imageType: 'DEFECT',
                                 order: 2
                             }
