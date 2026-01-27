@@ -115,6 +115,14 @@ export function Header() {
                             <Input
                                 placeholder="제품 검색..."
                                 className="pl-10 bg-muted/50 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20 rounded-xl transition-all"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        const target = e.target as HTMLInputElement;
+                                        if (target.value.trim()) {
+                                            router.push(`/products?search=${encodeURIComponent(target.value.trim())}`);
+                                        }
+                                    }
+                                }}
                             />
                         </div>
                     </div>
@@ -195,6 +203,15 @@ export function Header() {
                                 <Input
                                     placeholder="제품 검색..."
                                     className="pl-10 bg-muted/50 border-0 rounded-xl"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const target = e.target as HTMLInputElement;
+                                            if (target.value.trim()) {
+                                                setIsMenuOpen(false);
+                                                router.push(`/products?search=${encodeURIComponent(target.value.trim())}`);
+                                            }
+                                        }
+                                    }}
                                 />
                             </div>
 

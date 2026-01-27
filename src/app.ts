@@ -67,12 +67,6 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging middleware
-app.use((req: Request, res: Response, next) => {
-    logger.info(`${req.method} ${req.path}`);
-    next();
-});
-
 // Health check
 app.get('/health', (req: Request, res: Response) => {
     res.json({

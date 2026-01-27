@@ -58,10 +58,12 @@ function ProductsContent() {
             const categoryId = searchParams.get('categoryId');
             const overallGrade = searchParams.get('overallGrade');
             const brand = searchParams.get('brand');
+            const search = searchParams.get('search');
 
             if (categoryId) params.set('categoryId', categoryId);
             if (overallGrade) params.set('overallGrade', overallGrade);
             if (brand) params.set('brand', brand);
+            if (search) params.set('search', search);
 
             const productsRes = await fetch(
                 `${API_URL}/products?${params.toString()}`
