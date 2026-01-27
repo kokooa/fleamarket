@@ -145,6 +145,29 @@ async function main() {
             // Random defect
             const defectBase = random(DEFEKTS);
 
+            // Determine image keywords based on Category and Brand
+            let imageKeyword = random(catData.keywords); // Default fallback
+            const brand = model.split(' ')[0].toLowerCase();
+
+            if (catData.slug === 'smartphones') {
+                if (brand === 'iphone') imageKeyword = 'iphone';
+                else if (brand === 'galaxy' || brand === 'samsung') imageKeyword = 'samsung galaxy phone';
+                else if (brand === 'pixel') imageKeyword = 'google pixel phone';
+            } else if (catData.slug === 'laptops') {
+                if (brand === 'macbook' || brand === 'apple') imageKeyword = 'macbook pro';
+                else if (brand === 'dell') imageKeyword = 'dell xps laptop';
+                else if (brand === 'thinkpad') imageKeyword = 'lenovo thinkpad';
+                else if (brand === 'lg') imageKeyword = 'lg gram';
+            } else if (catData.slug === 'audio') {
+                if (brand === 'sony') imageKeyword = 'sony headphones';
+                else if (brand === 'airpods' || brand === 'apple') imageKeyword = 'airpods pro';
+                else if (brand === 'bose') imageKeyword = 'bose headphones';
+            } else if (catData.slug === 'gaming') {
+                if (brand === 'playstation') imageKeyword = 'ps5 console';
+                else if (brand === 'xbox') imageKeyword = 'xbox series x';
+                else if (brand === 'nintendo') imageKeyword = 'nintendo switch';
+            }
+
             // Create Product
             await prisma.product.create({
                 data: {
@@ -180,13 +203,13 @@ async function main() {
                     images: {
                         create: [
                             {
-                                // Unsplash Source API for random images by keyword
-                                url: `https://source.unsplash.com/random/800x600/?${random(catData.keywords)}&sig=${randomInt(1, 10000)}`,
+                                // Unsplash Source API with specific keyword
+                                url: `https://source.unsplash.com/random/800x600/?${encodeURIComponent(imageKeyword)}&sig=${randomInt(1, 10000)}`,
                                 imageType: 'MAIN',
                                 order: 1
                             },
                             {
-                                url: `https://source.unsplash.com/random/800x600/?detail,texture&sig=${randomInt(10001, 20000)}`,
+                                url: `https://source.unsplash.com/random/800x600/?defect,broken,texture&sig=${randomInt(10001, 20000)}`,
                                 imageType: 'DEFECT',
                                 order: 2
                             }
