@@ -69,9 +69,33 @@ export function Header() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden lg:flex items-center gap-8">
-                        <Link href="/products" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
-                            전체 상품
-                        </Link>
+                        <div className="relative group">
+                            <button className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium py-2">
+                                카테고리
+                            </button>
+                            <div className="absolute top-full left-0 w-48 bg-background border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                                <div className="p-1">
+                                    {[
+                                        { name: '스마트폰', slug: 'smartphones' },
+                                        { name: '노트북', slug: 'laptops' },
+                                        { name: '오디오', slug: 'audio' },
+                                        { name: '게임기', slug: 'gaming' },
+                                        { name: '카메라', slug: 'cameras' },
+                                        { name: '웨어러블', slug: 'wearables' },
+                                        { name: 'TV/모니터', slug: 'displays' },
+                                        { name: 'PC부품', slug: 'pc-parts' },
+                                    ].map((category) => (
+                                        <Link
+                                            key={category.slug}
+                                            href={`/products?category=${category.slug}`}
+                                            className="block px-3 py-2 text-sm text-foreground hover:bg-muted rounded-lg transition-colors"
+                                        >
+                                            {category.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                         {user?.role === 'SELLER' && (
                             <Link href="/seller" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
                                 판매자 대시보드
@@ -82,9 +106,6 @@ export function Header() {
                                 관리자 패널
                             </Link>
                         )}
-                        <Link href="/products?sort=newest" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
-                            신상품
-                        </Link>
                     </nav>
 
                     {/* Search Bar */}

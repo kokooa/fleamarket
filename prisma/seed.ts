@@ -1,16 +1,87 @@
-import { PrismaClient, UserRole, OverallGrade, FunctionalStatus, CosmeticGrade } from '@prisma/client';
+import { PrismaClient, UserRole, OverallGrade, FunctionalStatus, CosmeticGrade, ProductStatus, DefectSeverity, DefectType } from '@prisma/client';
 import bcryptjs from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// Helper to get random item from array
+const random = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+// Helper to get random number in range
+const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// Real-ish data for generation
+const DEFEKTS = [
+    { type: DefectType.SCREEN_CRACK, desc: "화면 모서리에 작은 금이 있습니다.", severity: DefectSeverity.MINOR },
+    { type: DefectType.SCREEN_BURN_IN, desc: "약한 잔상이 남아있습니다.", severity: DefectSeverity.MINOR },
+    { type: DefectType.BATTERY_DEGRADED, desc: "배터리 효율이 80% 이하입니다.", severity: DefectSeverity.MODERATE },
+    { type: DefectType.PHYSICAL_DAMAGE, desc: "생활 기스가 다수 존재합니다.", severity: DefectSeverity.MINOR },     // Mapped SCRATCH to PHYSICAL_DAMAGE
+    { type: DefectType.PHYSICAL_DAMAGE, desc: "모서리에 찍힘 자국이 있습니다.", severity: DefectSeverity.MODERATE }, // Mapped DENT to PHYSICAL_DAMAGE
+    { type: DefectType.BUTTON_DEFECT, desc: "볼륨 버튼이 뻑뻑합니다.", severity: DefectSeverity.MODERATE },
+    { type: DefectType.SPEAKER_DEFECT, desc: "스피커 음량이 약간 작습니다.", severity: DefectSeverity.MINOR },
+    { type: DefectType.CAMERA_DEFECT, desc: "카메라 렌즈에 미세한 먼지가 있습니다.", severity: DefectSeverity.MINOR },
+    { type: DefectType.OTHER, desc: "박스가 없습니다.", severity: DefectSeverity.MINOR },                            // Mapped NO_BOX to OTHER
+    { type: DefectType.OTHER, desc: "충전 케이블이 없습니다.", severity: DefectSeverity.MINOR },                      // Mapped COMPONENT_MISSING to OTHER
+];
+
+const CATEGORIES = [
+    {
+        name: '스마트폰',
+        slug: 'smartphones',
+        keywords: ['smartphone', 'iphone', 'samsung galaxy', 'pixel phone'],
+        models: ['iPhone 13', 'iPhone 14 Pro', 'Galaxy S22', 'Galaxy Z Flip 4', 'Pixel 7', 'iPhone 12 mini', 'Galaxy S21']
+    },
+    {
+        name: '노트북',
+        slug: 'laptops',
+        keywords: ['laptop', 'macbook', 'gaming laptop', 'surface pro'],
+        models: ['MacBook Air M1', 'MacBook Pro 14', 'Dell XPS 13', 'ThinkPad X1', 'LG Gram', 'ASUS ROG Zephyrus', 'Surface Laptop 4']
+    },
+    {
+        name: '오디오',
+        slug: 'audio',
+        keywords: ['headphones', 'earbuds', 'speaker', 'sony headphones'],
+        models: ['Sony WH-1000XM4', 'AirPods Pro', 'Bose QC45', 'Marshall Stanmore', 'JBL Flip 6', 'Galaxy Buds 2 Pro', 'Sony WF-1000XM4']
+    },
+    {
+        name: '게임기',
+        slug: 'gaming',
+        keywords: ['gaming console', 'ps5', 'xbox', 'nintendo switch'],
+        models: ['PlayStation 5', 'Nintendo Switch OLED', 'Xbox Series X', 'Steam Deck', 'Quest 2', 'PlayStation 4 Pro', 'Xbox Series S']
+    },
+    {
+        name: '카메라',
+        slug: 'cameras',
+        keywords: ['digital camera', 'dslr', 'mirrorless camera', 'film camera'],
+        models: ['Sony A7 III', 'Fujifilm X100V', 'Canon EOS R6', 'Leica Q2', 'Instax Mini 11', 'Nikon Z6 II', 'Sony ZV-E10']
+    },
+    {
+        name: '웨어러블',
+        slug: 'wearables',
+        keywords: ['smartwatch', 'apple watch', 'fitness tracker'],
+        models: ['Apple Watch Series 8', 'Galaxy Watch 5', 'Garmin Forerunner', 'Fitbit Charge 5', 'Apple Watch SE', 'Galaxy Watch 4 Classic']
+    },
+    {
+        name: 'TV/모니터',
+        slug: 'displays',
+        keywords: ['monitor', 'smart tv', 'gaming monitor'],
+        models: ['LG OLED TV', 'Samsung Odyssey G7', 'Dell UltraSharp', 'BenQ ScreenBar', 'Samsung Smart Monitor M7', 'LG UltraGear']
+    },
+    {
+        name: 'PC부품',
+        slug: 'pc-parts',
+        keywords: ['graphics card', 'cpu', 'motherboard', 'ram'],
+        models: ['RTX 3070', 'RTX 4090', 'Intel i9-13900K', 'Ryzen 7 5800X', 'Corsair RAM', 'Samsung 980 Pro SSD', 'NZXT Kraken Cooler']
+    },
+];
+
 async function main() {
     console.log('🌱 Starting database seed...');
 
-    // Clear existing data (optional - for development)
+    // Clear existing data
     await prisma.review.deleteMany();
     await prisma.orderItem.deleteMany();
     await prisma.order.deleteMany();
     await prisma.defectDetail.deleteMany();
+    await prisma.cartItem.deleteMany();
     await prisma.productImage.deleteMany();
     await prisma.productCondition.deleteMany();
     await prisma.product.deleteMany();
@@ -21,55 +92,31 @@ async function main() {
     // Create users
     const hashedPassword = await bcryptjs.hash('password123', 10);
 
-    const admin = await prisma.user.create({
-        data: {
-            email: 'admin@marketplace.com',
-            password: hashedPassword,
-            name: 'Admin User',
-            role: UserRole.ADMIN,
-            emailVerified: true,
-        },
-    });
-
-    const seller1 = await prisma.user.create({
-        data: {
-            email: 'seller1@gmail.com',
-            password: hashedPassword,
-            name: '김철수',
-            role: UserRole.SELLER,
-            phone: '010-1234-5678',
-            emailVerified: true,
-            sellerProfile: {
-                create: {
-                    shopName: '철수의 중고전자',
-                    description: '정직한 거래를 약속합니다.',
+    const sellers = [];
+    for (let i = 1; i <= 3; i++) {
+        const seller = await prisma.user.create({
+            data: {
+                email: `seller${i}@gmail.com`,
+                password: hashedPassword,
+                name: `판매자${i}`,
+                role: UserRole.SELLER,
+                emailVerified: true,
+                sellerProfile: {
+                    create: {
+                        shopName: `판매자${i}의 상점`,
+                        description: '믿을 수 있는 중고 제품 판매점입니다.',
+                    },
                 },
             },
-        },
-    });
+        });
+        sellers.push(seller);
+    }
 
-    const seller2 = await prisma.user.create({
-        data: {
-            email: 'seller2@gmail.com',
-            password: hashedPassword,
-            name: '이영희',
-            role: UserRole.SELLER,
-            phone: '010-9876-5432',
-            emailVerified: true,
-            sellerProfile: {
-                create: {
-                    shopName: '영희의 부품샵',
-                    description: '수리용 부품 전문',
-                },
-            },
-        },
-    });
-
-    const buyer1 = await prisma.user.create({
+    const buyer = await prisma.user.create({
         data: {
             email: 'buyer@gmail.com',
             password: hashedPassword,
-            name: '박민수',
+            name: '구매자1',
             role: UserRole.BUYER,
             emailVerified: true,
         },
@@ -77,249 +124,86 @@ async function main() {
 
     console.log('✅ Users created');
 
-    // Create categories
-    const smartphoneCategory = await prisma.category.create({
-        data: {
-            name: '스마트폰',
-            slug: 'smartphones',
-            description: '스마트폰 및 휴대폰',
-            order: 1,
-        },
-    });
-
-    const iphoneCategory = await prisma.category.create({
-        data: {
-            name: 'iPhone',
-            slug: 'iphone',
-            description: 'Apple iPhone',
-            parentId: smartphoneCategory.id,
-            order: 1,
-        },
-    });
-
-    const galaxyCategory = await prisma.category.create({
-        data: {
-            name: 'Galaxy',
-            slug: 'galaxy',
-            description: 'Samsung Galaxy',
-            parentId: smartphoneCategory.id,
-            order: 2,
-        },
-    });
-
-    const laptopCategory = await prisma.category.create({
-        data: {
-            name: '노트북',
-            slug: 'laptops',
-            description: '노트북 컴퓨터',
-            order: 2,
-        },
-    });
-
-    const macbookCategory = await prisma.category.create({
-        data: {
-            name: 'MacBook',
-            slug: 'macbook',
-            description: 'Apple MacBook',
-            parentId: laptopCategory.id,
-            order: 1,
-        },
-    });
-
-    const tabletCategory = await prisma.category.create({
-        data: {
-            name: '태블릿',
-            slug: 'tablets',
-            description: '태블릿 PC',
-            order: 3,
-        },
-    });
-
-    const headphoneCategory = await prisma.category.create({
-        data: {
-            name: '헤드폰/이어폰',
-            slug: 'headphones',
-            description: '오디오 기기',
-            order: 4,
-        },
-    });
-
-    console.log('✅ Categories created');
-
-    // Create sample products
-    const _product1 = await prisma.product.create({
-        data: {
-            sellerId: seller1.id,
-            categoryId: iphoneCategory.id,
-            name: 'iPhone 13 Pro 128GB 그라파이트',
-            description: '화면 깨짐 있지만 정상 작동합니다. 배터리 건강도 85%입니다.',
-            brand: 'Apple',
-            model: 'iPhone 13 Pro',
-            serialNumber: 'C39XXXXXXX',
-            originalPrice: 1200000,
-            sellingPrice: 450000,
-            status: 'ACTIVE',
-            purchaseDate: new Date('2021-10-15'),
-            warrantyMonths: 12,
-            isForParts: false,
-            isRepairable: true,
-            repairNotes: '화면 교체 시 정상 사용 가능. 예상 수리비 약 20만원',
-            condition: {
-                create: {
-                    overallGrade: OverallGrade.C_FAIR,
-                    functionalStatus: FunctionalStatus.FULLY_WORKING,
-                    cosmeticGrade: CosmeticGrade.FAIR,
-                    batteryHealth: 85,
-                    screenDefect: true,
-                    cameraDefect: false,
-                    speakerDefect: false,
-                    portDefect: false,
-                    buttonDefect: false,
-                    additionalNotes: '앞면 화면 우측 상단 균열, 그 외 정상',
-                },
+    // Create Categories and Products
+    for (const catData of CATEGORIES) {
+        const category = await prisma.category.create({
+            data: {
+                name: catData.name,
+                slug: catData.slug,
+                description: `${catData.name} 관련 제품 모음`,
             },
-            defects: {
-                create: [
-                    {
-                        defectType: 'SCREEN_CRACK',
-                        severity: 'MODERATE',
-                        description: '화면 우측 상단 3cm 균열, 터치는 정상 작동',
+        });
+        console.log(`✅ Category created: ${catData.name}`);
+
+        for (let i = 0; i < 15; i++) {
+            const model = random(catData.models);
+            const seller = random(sellers);
+            const originalPrice = randomInt(100000, 2000000);
+            const discountRate = randomInt(10, 60) / 100;
+            const sellingPrice = Math.floor(originalPrice * (1 - discountRate));
+
+            // Random defect
+            const defectBase = random(DEFEKTS);
+
+            // Create Product
+            await prisma.product.create({
+                data: {
+                    sellerId: seller.id,
+                    categoryId: category.id,
+                    name: `${model} (${defectBase.desc.split(' ')[0]})`, // e.g., "iPhone 13 (화면)"
+                    description: `이 제품은 ${model}입니다. ${defectBase.desc} 기능상 문제는 없으나 외관상 하자가 있습니다. 저렴하게 가져가세요.`,
+                    brand: model.split(' ')[0],
+                    model: model,
+                    originalPrice: originalPrice,
+                    sellingPrice: sellingPrice,
+                    status: ProductStatus.ACTIVE,
+                    purchaseDate: new Date(Date.now() - randomInt(0, 1000 * 60 * 60 * 24 * 365 * 3)), // up to 3 years ago
+                    condition: {
+                        create: {
+                            overallGrade: OverallGrade.B_GOOD,
+                            functionalStatus: FunctionalStatus.FULLY_WORKING,
+                            cosmeticGrade: CosmeticGrade.FAIR,
+                            screenDefect: defectBase.type === DefectType.SCREEN_CRACK || defectBase.type === DefectType.SCREEN_BURN_IN,
+                            cameraDefect: defectBase.type === DefectType.CAMERA_DEFECT,
+                            speakerDefect: defectBase.type === DefectType.SPEAKER_DEFECT,
+                            buttonDefect: defectBase.type === DefectType.BUTTON_DEFECT,
+                            additionalNotes: defectBase.desc,
+                        }
                     },
-                    {
-                        defectType: 'BATTERY_DEGRADED',
-                        severity: 'MINOR',
-                        description: '배터리 건강도 85%, 하루 사용 가능',
+                    defects: {
+                        create: [{
+                            defectType: defectBase.type,
+                            severity: defectBase.severity,
+                            description: defectBase.desc
+                        }]
                     },
-                ],
-            },
-            images: {
-                create: [
-                    {
-                        url: 'https://via.placeholder.com/800x600?text=iPhone+13+Pro+Main',
-                        imageType: 'MAIN',
-                        order: 1,
-                    },
-                    {
-                        url: 'https://via.placeholder.com/800x600?text=Screen+Crack',
-                        imageType: 'DEFECT',
-                        order: 2,
-                    },
-                ],
-            },
-        },
-    });
+                    images: {
+                        create: [
+                            {
+                                // Unsplash Source API for random images by keyword
+                                url: `https://source.unsplash.com/random/800x600/?${random(catData.keywords)}&sig=${randomInt(1, 10000)}`,
+                                imageType: 'MAIN',
+                                order: 1
+                            },
+                            {
+                                url: `https://source.unsplash.com/random/800x600/?detail,texture&sig=${randomInt(10001, 20000)}`,
+                                imageType: 'DEFECT',
+                                order: 2
+                            }
+                        ]
+                    }
+                }
+            });
+        }
+    }
 
-    const _product2 = await prisma.product.create({
-        data: {
-            sellerId: seller2.id,
-            categoryId: galaxyCategory.id,
-            name: 'Galaxy S21 Ultra 256GB (부품용)',
-            description: '메인보드 고장으로 켜지지 않습니다. 부품 추출용으로 판매합니다.',
-            brand: 'Samsung',
-            model: 'Galaxy S21 Ultra',
-            originalPrice: 1400000,
-            sellingPrice: 180000,
-            status: 'ACTIVE',
-            isForParts: true,
-            isRepairable: false,
-            repairNotes: '메인보드 교체 필요, 경제성 없음',
-            condition: {
-                create: {
-                    overallGrade: OverallGrade.F_FOR_PARTS,
-                    functionalStatus: FunctionalStatus.NOT_WORKING,
-                    cosmeticGrade: CosmeticGrade.GOOD,
-                    screenDefect: false,
-                    cameraDefect: false,
-                    speakerDefect: false,
-                    portDefect: false,
-                    buttonDefect: false,
-                    additionalNotes: '외관 양호, 화면/카메라/배터리 정상 (부품 활용 가능)',
-                },
-            },
-            defects: {
-                create: [
-                    {
-                        defectType: 'SOFTWARE_ISSUE',
-                        severity: 'CRITICAL',
-                        description: '메인보드 고장으로 전원 안 켜짐',
-                    },
-                ],
-            },
-            images: {
-                create: [
-                    {
-                        url: 'https://via.placeholder.com/800x600?text=Galaxy+S21+Ultra',
-                        imageType: 'MAIN',
-                        order: 1,
-                    },
-                ],
-            },
-        },
-    });
-
-    const _product3 = await prisma.product.create({
-        data: {
-            sellerId: seller1.id,
-            categoryId: macbookCategory.id,
-            name: 'MacBook Pro 2019 15인치 (배터리 문제)',
-            description: '배터리가 부풀어서 트랙패드 눌림이 안 됩니다. 전원 연결 시 정상 작동.',
-            brand: 'Apple',
-            model: 'MacBook Pro 15 2019',
-            serialNumber: 'C02XXXXXXX',
-            originalPrice: 2800000,
-            sellingPrice: 850000,
-            status: 'ACTIVE',
-            purchaseDate: new Date('2019-07-20'),
-            isForParts: false,
-            isRepairable: true,
-            repairNotes: '배터리 교체 필요. 공식 AS 약 30만원',
-            condition: {
-                create: {
-                    overallGrade: OverallGrade.C_FAIR,
-                    functionalStatus: FunctionalStatus.PARTIALLY_WORKING,
-                    cosmeticGrade: CosmeticGrade.GOOD,
-                    screenDefect: false,
-                    cameraDefect: false,
-                    speakerDefect: false,
-                    portDefect: false,
-                    buttonDefect: true,
-                    additionalNotes: '배터리 부풀어서 트랙패드 클릭 불가, 마우스 사용 필요',
-                },
-            },
-            defects: {
-                create: [
-                    {
-                        defectType: 'BATTERY_SWOLLEN',
-                        severity: 'SEVERE',
-                        description: '배터리 팽창으로 트랙패드 버튼 작동 불가',
-                    },
-                ],
-            },
-            images: {
-                create: [
-                    {
-                        url: 'https://via.placeholder.com/800x600?text=MacBook+Pro',
-                        imageType: 'MAIN',
-                        order: 1,
-                    },
-                ],
-            },
-        },
-    });
-
-    console.log('✅ Products created');
-
-    console.log('\n🎉 Database seeding completed successfully!');
-    console.log('\n📝 Test accounts:');
-    console.log('Admin: admin@marketplace.com / password123');
-    console.log('Seller 1: seller1@gmail.com / password123');
-    console.log('Seller 2: seller2@gmail.com / password123');
-    console.log('Buyer: buyer@gmail.com / password123');
+    console.log('✅ 120 Products created (15 per category)');
+    console.log('🎉 Seeding finished.');
 }
 
 main()
     .catch((e) => {
-        console.error('❌ Error during seeding:', e);
+        console.error(e);
         process.exit(1);
     })
     .finally(async () => {
