@@ -200,6 +200,11 @@ export default function CartPage() {
                                                     src={imageUrl}
                                                     alt={item.product.name}
                                                     className="w-32 h-32 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        const text = encodeURIComponent(item.product.brand || item.product.name.substring(0, 5));
+                                                        target.src = `https://placehold.co/200x200/e0e7ff/4f46e5?text=${text}`;
+                                                    }}
                                                 />
                                             </Link>
 
@@ -224,15 +229,11 @@ export default function CartPage() {
                                                     {Number(item.product.sellingPrice).toLocaleString()}원
                                                 </p>
 
-                                                {/* 수량 표시 (고정) */}
+                                                {/* 제거 버튼 (수량 표시 삭제됨) */}
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex items-center border border-gray-300 rounded-lg bg-gray-50">
-                                                        <span className="px-6 py-2 font-semibold text-gray-500">1</span>
-                                                    </div>
-
                                                     <button
                                                         onClick={() => removeItem(item.id)}
-                                                        className="text-red-600 hover:text-red-700 font-medium text-sm"
+                                                        className="text-red-600 hover:text-red-700 font-medium text-sm border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
                                                     >
                                                         제거
                                                     </button>
