@@ -63,7 +63,7 @@ export function Header() {
                             <Box className="w-5 h-5 text-primary-foreground" />
                         </div>
                         <span className="text-xl font-bold tracking-tight text-foreground">
-                            defekt
+                            모듈러
                         </span>
                     </Link>
 

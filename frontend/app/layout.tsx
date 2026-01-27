@@ -9,7 +9,7 @@ const geist = Geist({ subsets: ["latin"] });
 const geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'DEFEKT | 하자 전자제품 마켓플레이스',
+  title: '모듈러 | 하자 전자제품 마켓플레이스',
   description: '결함이 있어도 가치가 있다. 최대 90% 할인된 가격으로 전자제품을 만나보세요.',
   generator: 'v0.app',
   icons: {

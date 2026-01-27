@@ -15,7 +15,7 @@ export function Footer() {
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                                 <Box className="w-4 h-4 text-primary-foreground" />
                             </div>
-                            <span className="text-lg font-bold text-foreground">defekt</span>
+                            <span className="text-lg font-bold text-foreground">모듈러</span>
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                             결함이 있어도 가치가 있다. 전자제품의 새로운 생명을 찾아주는 마켓플레이스.
@@ -62,19 +62,8 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-sm text-muted-foreground">
-                        2026 defekt. All rights reserved.
+                        2026 모듈러. All rights reserved.
                     </p>
-                    <div className="flex items-center gap-6">
-                        <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                            이용약관
-                        </Link>
-                        <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                            개인정보처리방침
-                        </Link>
-                        <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                            쿠키 설정
-                        </Link>
-                    </div>
                 </div>
             </div>
         </footer>
